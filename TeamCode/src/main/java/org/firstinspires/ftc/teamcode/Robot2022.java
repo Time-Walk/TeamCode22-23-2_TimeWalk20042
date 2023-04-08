@@ -654,7 +654,7 @@ public class Robot2022 extends Robot {
         LT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ErLast = 0;
-        double I = 0;
+        double rI = 0;
         //double dt = 0;
         while ( Math.abs(ticks - LT.getCurrentPosition()) > 5 && L.opModeIsActive() ) {
             //dt += 1;
@@ -664,7 +664,8 @@ public class Robot2022 extends Robot {
             double P = kp * Er;
 
             double ki = 123;
-            I = (I + Er) * ki;
+            rI = rI + Er;
+            double I = rI * ki;
 
             double kd = 123;
             double ErD = Er - ErLast;
