@@ -14,6 +14,19 @@ public class AUTOFORTEST extends LinearOpMode {
         Robot2022 R = new Robot2022();
         R.initFields(telemetry, this, hardwareMap);
         R.init();
+
+        telemetry = R.ftcDash.getTelemetry();
+
+        telemetry.addData("LT", 0);
+        telemetry.addData("Err", 0);
+        telemetry.addData("P", 0);
+        telemetry.addData("rI", 0);
+        telemetry.addData("I", 0);
+        telemetry.addData("ErD", 0);
+        telemetry.addData("D", 0);
+        telemetry.addData("pwf", 0);
+        telemetry.update();
+
         waitForStart();
 
         //okay, let's go!
@@ -35,7 +48,7 @@ public class AUTOFORTEST extends LinearOpMode {
             telemetry.update();
         }*/
 
-        R.g(400);
+        /*R.g(400);
         R.delay(1000);
         R.g(-400);
         R.delay(1000);
@@ -44,7 +57,18 @@ public class AUTOFORTEST extends LinearOpMode {
         R.g(200);
         R.delay(1000);
         R.g(-350);
+        R.delay(1000);*/
+
+        //Low - 240
+        //Medium - 390
+        //High - 545
+
+        R.setLift(545);
+        R.LT.setPower(0.0008);
         R.delay(1000);
+        telemetry.addData("LT", R.LT.getCurrentPosition());
+        telemetry.update();
+        R.delay(10000);
 
     }
 

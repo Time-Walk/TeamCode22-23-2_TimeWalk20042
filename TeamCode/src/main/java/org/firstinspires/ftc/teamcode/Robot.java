@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -7,7 +8,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public abstract class Robot {
-    Telemetry telemetry; //Создование всех переменных
+    FtcDashboard ftcDash = FtcDashboard.getInstance();
+    //Telemetry telemetry; //Создование всех переменных
+    Telemetry telemetry = ftcDash.getTelemetry();
     Gamepad gamepad1;
     Gamepad gamepad2;
     LinearOpMode L;

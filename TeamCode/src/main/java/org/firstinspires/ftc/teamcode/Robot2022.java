@@ -27,7 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaLocalizerImpl;
 
 public class Robot2022 extends Robot {
-    DcMotor RF, LF, RB, LB, LT;
+    DcMotor RF, LF, RB, LB, LT, NE;
     Servo KL, KL1;
     BNO055IMU imu; //Акселерометр
 
@@ -38,6 +38,8 @@ public class Robot2022 extends Robot {
 
     VoltageSensor vs;
 
+    String NeState;
+
     @Override
     void init() { //Инициализация:
 
@@ -47,6 +49,8 @@ public class Robot2022 extends Robot {
         RF = hwmp.get(DcMotor.class, "RF");
 
         LT = hwmp.get(DcMotor.class, "LT");
+
+        NE = hwmp.get(DcMotor.class, "NE");
 
         LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); //Режим остоновки: торможение
         RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -77,11 +81,13 @@ public class Robot2022 extends Robot {
         }
         telemetry.addData("Done!", "Calibrated"); //Сообщение об окончании калибровки
         telemetry.update();
+
+        NeState = "Hold";
     }
 
     @Override
     void initFields(Telemetry telemetry, LinearOpMode L, HardwareMap hwmp) { //Инициализация
-        this.telemetry = telemetry;
+        this.telemetry = ftcDash.getTelemetry();
         this.L = L;
         this.hwmp = hwmp;
 
@@ -660,14 +666,14 @@ public class Robot2022 extends Robot {
             //dt += 1;
             double Er = ticks - LT.getCurrentPosition();
 
-            double kp = 123;
+            double kp = 0.0015;
             double P = kp * Er;
 
-            double ki = 123;
+            double ki = 0.00003;
             rI = rI + Er;
             double I = rI * ki;
 
-            double kd = 123;
+            double kd = 0.0002;
             double ErD = Er - ErLast;
             double D = kd * ErD;
 
@@ -675,10 +681,23 @@ public class Robot2022 extends Robot {
 
             ErLast = Er;
 
+            telemetry.addData("LT", LT.getCurrentPosition());
+            telemetry.addData("Err", Er);
+            telemetry.addData("P", P);
+            telemetry.addData("rI", rI);
+            telemetry.addData("I", I);
+            telemetry.addData("ErD", ErD);
+            telemetry.addData("D", D);
+            telemetry.addData("pwf", pwf);
+            telemetry.update();
+
             LT.setPower(pwf);
+
+            delay(50);
         }
+        telemetry.addData("Work ended in", LT.getCurrentPosition());
         LT.setPower(0);
-        delay(500);
+        delay(50);
     }
 
     void wheelbase() {
@@ -692,6 +711,25 @@ public class Robot2022 extends Robot {
         LB.setPower(lb);
     }
 
+    Thread initNeonController = new Thread() {
+        @Override
+        public void run() {
+            while (!L.opModeIsActive() && !L.isStopRequested()) {
+                NeonController();
+            }
+        }
+    };
+
+    Thread AutoNeonController = new Thread() {
+        @Override
+        public void run() {
+            while (L.opModeIsActive() && !L.isStopRequested()) {
+                NeonController();
+            }
+        }
+    };
+
+    double HOLDPOWER = 0.0008;
     Thread liftControllerT = new Thread() { //Поток для лифта
         @Override
         public void run() {
@@ -700,16 +738,7 @@ public class Robot2022 extends Robot {
             while (L.opModeIsActive() && !L.isStopRequested()) {
                 //telemetry.addData("y", gamepad2.left_stick_y);
                 //telemetry.update();
-                LT.setPower((gamepad2.right_stick_y/-1.7)+Power); //Управление лифтом стиком
-                if (gamepad2.y) { //Поднять до конца
-                    LT.setPower(0.75);  //начальное ускорение
-                    delay(200);
-                    LT.setPower(0.4);    //спокойная скорость
-                    delay(350);
-                    LT.setPower(0);      //стоп
-                    Power = 0.14;
-                    hold = true;
-                }
+                LT.setPower((gamepad2.right_stick_y/-2.4)+Power); //Управление лифтом стиком
                 if (gamepad2.a) {
                     if ( hold ) {
                         Power = 0;
@@ -717,10 +746,31 @@ public class Robot2022 extends Robot {
                         delay(300);
                     }
                     else {
-                        Power = 0.24;
+                        Power = HOLDPOWER;
                         hold = true;
                         delay(300);
                     }
+                }
+                if (gamepad2.x) {
+                    NeState = "Plink";
+                    plinkCount = 1;
+                    setLift(240);
+                    Power = HOLDPOWER;
+                    hold = true;
+                }
+                if (gamepad2.b) {
+                    NeState = "Plink";
+                    plinkCount = 2;
+                    setLift(390);
+                    Power = HOLDPOWER;
+                    hold = true;
+                }
+                if (gamepad2.y) {
+                    NeState = "Plink";
+                    plinkCount = 3;
+                    setLift(545);
+                    Power = HOLDPOWER;
+                    hold = true;
                 }
             }
         }
@@ -756,15 +806,19 @@ public class Robot2022 extends Robot {
     }
 
     //double servoPos=0.1;
-    double CLOSEPOS = 0.15;
-    double OPENPOS = 0;
+    double CLOSEPOS = 0.7;
+    double OPENPOS = 0.8;
     boolean isDpadL = false;
     boolean isDpadR = false;
+    boolean leftS = false;
+    boolean rightS = false;
     void servoController() {
         if (gamepad2.left_bumper ) {
-            KL.setPosition(OPENPOS); }
+            if ( !leftS ) {
+            KL.setPosition(OPENPOS); leftS = true; }} else { leftS = false; }
         if (gamepad2.right_bumper) {
-            KL.setPosition(CLOSEPOS); }
+            if ( !rightS ) {
+            KL.setPosition(CLOSEPOS); rightS = true; }} else { rightS = false; }
         if (gamepad2.dpad_left) {
             if ( !isDpadL ) {
                 isDpadL = true;
@@ -783,29 +837,32 @@ public class Robot2022 extends Robot {
         else { isDpadR = false; }
     }
 
+    void liftUp() {
+        setLift(555);
+    }
 
-    double ROTPOS = 1;
-    double DEFPOS  = 0.055;
+    double ROTPOS = 0.055;
+    double DEFPOS  = 0.9;
     boolean isDpadU = false;
     boolean isDpadD = false;
     void servoControllerPro() {
-        if (gamepad2.b) {
+        if (gamepad2.left_trigger > 0.6) {
             KL1.setPosition(DEFPOS);
         }
-        if (gamepad2.x) {
+        if (gamepad2.right_trigger > 0.6) {
             KL1.setPosition(ROTPOS);
         }
         if (gamepad2.dpad_down) {
             if ( !isDpadD ) {
                 isDpadD = true;
-                DEFPOS -= 0.025;
+                DEFPOS += 0.025;
                 KL1.setPosition(DEFPOS);
             }
         } else { isDpadD = false; }
         if (gamepad2.dpad_up) {
             if ( !isDpadU ) {
                 isDpadU = true;
-                DEFPOS += 0.025;
+                DEFPOS -= 0.025;
                 KL1.setPosition(DEFPOS);
             }
         } else { isDpadU = false; }
@@ -815,10 +872,10 @@ public class Robot2022 extends Robot {
         KL1.setPosition(DEFPOS);
     }
 
-    void liftUp() {
+    /*void liftUp() {
         LT.setPower(0.6);
         delay(1000);
-    }
+    }*/
 
     Bitmap setPixels_(Bitmap img, int fromx, int nx, int fromy, int ny, int colorRed, int colorGreen, int colorBlue) {
         for (int i=0; i<nx;i++) {
@@ -827,6 +884,36 @@ public class Robot2022 extends Robot {
             }
         }
         return img;
+    }
+
+    void NESetPower(double power) {
+        NE.setPower(Math.abs(power));
+    }
+
+    double plinkCount = 0;
+    double plinkR = 0;
+    double holdR = 0;
+    void NeonController() {
+        if ( NeState == "Driving" ) {
+            double NePower = 0.3;
+            NePower += Math.abs(gamepad1.left_stick_x)*0.2 + Math.abs(gamepad1.left_stick_y)*0.2 + Math.abs(gamepad1.right_stick_x)*0.2 + Math.abs(gamepad1.left_stick_y)*0.2 + Math.abs(gamepad1.left_trigger)*0.2 + Math.abs(gamepad1.right_trigger)*0.2;
+            NESetPower(NePower);
+        }
+        if ( NeState == "Plink" ) {
+            NESetPower((Math.abs(Math.sin(plinkR))*0.6)+0.3);
+            plinkR += 0.03;
+            if (plinkR >= 3) {
+                plinkCount -= 1;
+                plinkR = 0;
+            }
+            if (plinkCount == 0) {
+                NeState = "Driving";
+            }
+        }
+        if ( NeState == "Hold" ) {
+            NESetPower(Math.abs(Math.sin(holdR)));
+            holdR += 0.003;
+        }
     }
 
 }
