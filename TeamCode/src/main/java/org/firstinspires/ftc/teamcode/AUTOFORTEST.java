@@ -15,9 +15,9 @@ public class AUTOFORTEST extends LinearOpMode {
         R.initFields(telemetry, this, hardwareMap);
         R.init();
 
-        telemetry = R.ftcDash.getTelemetry();
+        //telemetry = R.ftcDash.getTelemetry();
 
-        telemetry.addData("LT", 0);
+        /*telemetry.addData("LT", 0);
         telemetry.addData("Err", 0);
         telemetry.addData("P", 0);
         telemetry.addData("rI", 0);
@@ -25,7 +25,7 @@ public class AUTOFORTEST extends LinearOpMode {
         telemetry.addData("ErD", 0);
         telemetry.addData("D", 0);
         telemetry.addData("pwf", 0);
-        telemetry.update();
+        telemetry.update();*/
 
         waitForStart();
 
@@ -63,12 +63,16 @@ public class AUTOFORTEST extends LinearOpMode {
         //Medium - 390
         //High - 545
 
-        R.setLift(545);
+        /*R.setLift(545);
         R.LT.setPower(0.0008);
         R.delay(1000);
         telemetry.addData("LT", R.LT.getCurrentPosition());
         telemetry.update();
-        R.delay(10000);
+        R.delay(10000);*/
+
+        R.g(1000);
+        R.delay(2000);
+        R.g(-1000);
 
     }
 

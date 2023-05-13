@@ -87,7 +87,7 @@ public class Robot2022 extends Robot {
 
     @Override
     void initFields(Telemetry telemetry, LinearOpMode L, HardwareMap hwmp) { //Инициализация
-        this.telemetry = ftcDash.getTelemetry();
+        this.telemetry = telemetry;
         this.L = L;
         this.hwmp = hwmp;
 
@@ -477,24 +477,41 @@ public class Robot2022 extends Robot {
         LF.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         double ErLast = 0;
+        double Ir = 0;
+        double startRotation = getAngle();
         while ( Math.abs(cc - LF.getCurrentPosition()) > 5 && L.opModeIsActive()) {
 
             double Er = cc - LF.getCurrentPosition();
 
-            double kp = 0.3;
+            double kp = 0.0005;
             telemetry.addData("KP", kp);
             double P = kp * Er ;
 
-            double kd = 0.1;
+            double ki = 0.000002;
+            Ir += Er;
+            double I = Ir * ki;
+
+            double kd = 0.00008;
             double ErD = ErLast - Er;
             double D = kd * ErD;
 
             if ( Math.abs(D) > Math.abs(P) ) { D=P; }
 
-            double pwf = P + D;
+            double REr = startRotation - getAngle();
 
-            LF.setPower(pwf);
-            RB.setPower(-pwf);
+            double Rkp = 0.04;
+            double RP = Rkp * REr;
+
+            double RLF = -RP;
+            double RRB = -RP;
+
+            telemetry.addData("RP", RP);
+            telemetry.update();
+
+            double pwf = P + I;
+
+            LF.setPower(pwf+RLF);
+            RB.setPower(-pwf+RRB);
         }
         setMtZero();
     }
@@ -510,6 +527,7 @@ public class Robot2022 extends Robot {
         double Er0 = -degrees;
         double errorFix=0;
         double ErLast = 0;
+        double Ir = 0;
         if (Er0 > 0) { pw = -1; }
         degrees = getAngle() - degrees;
         if (degrees < -180) {
@@ -530,10 +548,14 @@ public class Robot2022 extends Robot {
 
             double Er = degrees - (getAngle());
 
-            double kp = 0.6;
+            double kp = 0.1;
             double P = kp * Er / Er0 * pw;
 
-            double kd = 0.2;
+            Ir += -Er;
+            double ki = 0.0002;
+            double I = Ir * ki;
+
+            double kd = 0.1;
             double ErD = Er - ErLast;
             double D = kd * ErD * (1/Er);
 
@@ -545,7 +567,7 @@ public class Robot2022 extends Robot {
             ErLast = Er;
 
 
-            double pwf = P + Rele; //Регулятор
+            double pwf = P + I; //Регулятор
 
 
             LB.setPower(pwf);
@@ -598,7 +620,7 @@ public class Robot2022 extends Robot {
 
             double Er = degrees - (getAngle());
 
-            double kp = 0.45;
+            double kp = 0.48;
             double P = kp * Er / Er0 * pw;
 
             double kd = 0.1;
@@ -613,7 +635,7 @@ public class Robot2022 extends Robot {
             ErLast = Er;
 
 
-            double pwf = P + Rele; //Регулятор
+            double pwf = P; //Регулятор
 
 
             LB.setPower(pwf);
@@ -666,7 +688,7 @@ public class Robot2022 extends Robot {
             //dt += 1;
             double Er = ticks - LT.getCurrentPosition();
 
-            double kp = 0.0015;
+            double kp = 0.0013;
             double P = kp * Er;
 
             double ki = 0.00003;
@@ -738,7 +760,7 @@ public class Robot2022 extends Robot {
             while (L.opModeIsActive() && !L.isStopRequested()) {
                 //telemetry.addData("y", gamepad2.left_stick_y);
                 //telemetry.update();
-                LT.setPower((gamepad2.right_stick_y/-2.4)+Power); //Управление лифтом стиком
+                LT.setPower((gamepad2.right_stick_y/-2.6769)+Power); //Управление лифтом стиком
                 if (gamepad2.a) {
                     if ( hold ) {
                         Power = 0;
@@ -806,7 +828,7 @@ public class Robot2022 extends Robot {
     }
 
     //double servoPos=0.1;
-    double CLOSEPOS = 0.7;
+    double CLOSEPOS = 0.9;
     double OPENPOS = 0.8;
     boolean isDpadL = false;
     boolean isDpadR = false;
@@ -814,11 +836,11 @@ public class Robot2022 extends Robot {
     boolean rightS = false;
     void servoController() {
         if (gamepad2.left_bumper ) {
-            if ( !leftS ) {
-            KL.setPosition(OPENPOS); leftS = true; }} else { leftS = false; }
+            //if ( !leftS ) {
+            KL.setPosition(OPENPOS); leftS = true; }//} else { leftS = false; }
         if (gamepad2.right_bumper) {
-            if ( !rightS ) {
-            KL.setPosition(CLOSEPOS); rightS = true; }} else { rightS = false; }
+            //if ( !rightS ) {
+            KL.setPosition(CLOSEPOS); rightS = true; }//} else { rightS = false; }
         if (gamepad2.dpad_left) {
             if ( !isDpadL ) {
                 isDpadL = true;
@@ -826,6 +848,12 @@ public class Robot2022 extends Robot {
                 KL.setPosition(CLOSEPOS);
             }
         }
+        /*if (gamepad2.start) {
+            leftS = false;
+            rightS = false;
+            isDpadL = false;
+            isDpadR = false;
+        }*/
         else { isDpadL = false; }
         if (gamepad2.dpad_right) {
             if (!isDpadR) {
@@ -838,11 +866,11 @@ public class Robot2022 extends Robot {
     }
 
     void liftUp() {
-        setLift(555);
+        setLift(578);
     }
 
-    double ROTPOS = 0.055;
-    double DEFPOS  = 0.9;
+    double ROTPOS = 0;
+    double DEFPOS  = 0.85;
     boolean isDpadU = false;
     boolean isDpadD = false;
     void servoControllerPro() {
@@ -855,15 +883,19 @@ public class Robot2022 extends Robot {
         if (gamepad2.dpad_down) {
             if ( !isDpadD ) {
                 isDpadD = true;
-                DEFPOS += 0.025;
-                KL1.setPosition(DEFPOS);
+                OPENPOS -= 0.01;
+                KL.setPosition(OPENPOS);
+                //DEFPOS -= 0.025;
+                //KL1.setPosition(DEFPOS);
             }
         } else { isDpadD = false; }
         if (gamepad2.dpad_up) {
             if ( !isDpadU ) {
                 isDpadU = true;
-                DEFPOS -= 0.025;
-                KL1.setPosition(DEFPOS);
+                OPENPOS += 0.01;
+                KL.setPosition(OPENPOS);
+                //DEFPOS += 0.025;
+                //KL1.setPosition(DEFPOS);
             }
         } else { isDpadU = false; }
     }
@@ -900,8 +932,8 @@ public class Robot2022 extends Robot {
             NESetPower(NePower);
         }
         if ( NeState == "Plink" ) {
-            NESetPower((Math.abs(Math.sin(plinkR))*0.6)+0.3);
-            plinkR += 0.03;
+            NESetPower((Math.abs(Math.sin(plinkR))*0.7)+0.2);
+            plinkR += 0.01;
             if (plinkR >= 3) {
                 plinkCount -= 1;
                 plinkR = 0;

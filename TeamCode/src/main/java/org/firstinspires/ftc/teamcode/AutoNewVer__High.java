@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Autonomous(name="0-0480-Парковка", group="New")
-public class AutoNewVer__Raspoznovanie extends LinearOpMode {
+@Autonomous(name="0-0480-Высокий__КР-СП__СН-СЛ", group="New")
+public class AutoNewVer__High extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot2022 R = new Robot2022();
@@ -16,6 +16,7 @@ public class AutoNewVer__Raspoznovanie extends LinearOpMode {
         R.initNeonController.start();
 
         R.KL.setPosition(R.OPENPOS);
+        R.stabilizeKL();
 
         while ( !isStarted() ) {
             R.MgI = 0;
@@ -42,7 +43,8 @@ public class AutoNewVer__Raspoznovanie extends LinearOpMode {
         waitForStart();
         //R.AutoNeonController.start();
 
-        //R.KL.setPosition(R.CLOSEPOS);
+        R.KL.setPosition(R.CLOSEPOS);
+        R.stabilizeKL();
 
         //okay, let's go!
 
@@ -89,45 +91,35 @@ public class AutoNewVer__Raspoznovanie extends LinearOpMode {
         telemetry.update();
         R.delay(100);
 
-        if ( s == "Mg" ) {
-            R.setMtPower(0.35, 0.35, -0.35, -0.35);
-            R.delay(400);
-            R.setMtZero();
-            R.rotate(45);
-            R.g(-1150);
-            R.rotate(-85);
-            R.g(1600);
-            R.rotate(45);
-            /*R.setMtPower(-0.35, -0.35, 0.35, 0.35);
-            R.delay(400);
-            R.setMtZero();*/
-        }
-
-        if ( s == "Gr" ) {
-            R.setMtPower(0.35, 0.35, -0.35, -0.35);
-            R.delay(400);
-            R.setMtZero();
-            R.rotate(-48);
-            R.g(1700);
-            R.rotate(45);
-            /*R.setMtPower(-0.35, -0.35, 0.35, 0.35);
-            R.delay(400);
-            R.setMtZero();*/
-        }
-
-        if ( s == "Cn" || s == "Ns") {
-            R.setMtPower(0.35, 0.35, -0.35, -0.35);
-            R.delay(400);
-            R.setMtZero();
-            R.rotate(45);
-            R.g(1350);
-            R.rotate(-85);
-            R.g(1630);
-            R.rotate(45);
-            /*R.setMtPower(-0.35, -0.35, 0.35, 0.35);
-            R.delay(400);
-            R.setMtZero();*/
-        }
+        R.setMtPower(0.3, 0.3, -0.3, -0.3);
+        R.delay(700);
+        R.setMtZero();
+        R.rotateS(45);
+        R.g(-1050);
+        R.rotate(-90);
+        R.g(2050);
+        R.liftUp();
+        R.LT.setPower(R.HOLDPOWER);
+        R.rotate(90);
+        R.g(-700);
+        R.rotateS(-45);
+        R.setMtPower(-0.35, -0.35, 0.35, 0.35);
+        R.delay(200);
+        R.setMtZero();
+        R.KL1.setPosition(R.ROTPOS);
+        R.delay(1000);
+        R.KL1.setPosition(R.DEFPOS);
+        R.setMtPower(0.35, 0.35, -0.35, -0.35);
+        R.delay(200);
+        R.setMtZero();
+        R.rotateS(45);
+        R.g(700);
+        R.rotate(-90);
+        R.LT.setPower(-0.01);
+        R.delay(1500);
+        R.LT.setPower(0);
+        R.g(-1000);
+        R.rotate(90);
 
     }
 

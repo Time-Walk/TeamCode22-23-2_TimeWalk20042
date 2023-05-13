@@ -4,10 +4,9 @@ import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@Autonomous(name="0-0480-Парковка", group="New")
-public class AutoNewVer__Raspoznovanie extends LinearOpMode {
+@Autonomous(name="0-0480-Низкий(слева)--", group="New")
+public class AutoNewVer__Low extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Robot2022 R = new Robot2022();
@@ -42,7 +41,7 @@ public class AutoNewVer__Raspoznovanie extends LinearOpMode {
         waitForStart();
         //R.AutoNeonController.start();
 
-        //R.KL.setPosition(R.CLOSEPOS);
+        R.KL.setPosition(R.CLOSEPOS);
 
         //okay, let's go!
 
@@ -89,44 +88,53 @@ public class AutoNewVer__Raspoznovanie extends LinearOpMode {
         telemetry.update();
         R.delay(100);
 
+        R.stabilizeKL();
+        R.setLift(300);
+        R.LT.setPower(0.0008);
+        R.setMtPower(0.4, 0.4, -0.4, -0.4);
+        R.delay(500);
+        R.setMtZero();
+        R.rotateS(-55);
+        R.setMtPower(-0.35, -0.35, 0.35, 0.35);
+        R.delay(400);
+        R.setMtZero();
+        R.KL.setPosition(R.OPENPOS);
+        R.delay(2000);
+        R.KL.setPosition(R.CLOSEPOS);
+
         if ( s == "Mg" ) {
-            R.setMtPower(0.35, 0.35, -0.35, -0.35);
-            R.delay(400);
-            R.setMtZero();
-            R.rotate(45);
-            R.g(-1150);
-            R.rotate(-85);
-            R.g(1600);
-            R.rotate(45);
-            /*R.setMtPower(-0.35, -0.35, 0.35, 0.35);
-            R.delay(400);
-            R.setMtZero();*/
+            R.rotate(90);
+            R.g(-1200);
+            R.rotate(-90);
+            R.g(1700);
+            R.setLift(-190);
+            //R.LT.setPower(-0.1);
+            //R.delay(600);
+            //R.LT.setPower(0);
         }
 
         if ( s == "Gr" ) {
-            R.setMtPower(0.35, 0.35, -0.35, -0.35);
+            R.setLift(-190);
+            R.KL1.setPosition(R.DEFPOS-0.1);
+            R.g(1700);
+            R.setMtPower(0, -0.35, 0.35, 0);
             R.delay(400);
             R.setMtZero();
-            R.rotate(-48);
-            R.g(1700);
-            R.rotate(45);
-            /*R.setMtPower(-0.35, -0.35, 0.35, 0.35);
-            R.delay(400);
-            R.setMtZero();*/
+            R.rotateS(45);
+            //R.LT.setPower(-0.1);
+            //R.delay(600);
+            //R.LT.setPower(0);
         }
 
         if ( s == "Cn" || s == "Ns") {
-            R.setMtPower(0.35, 0.35, -0.35, -0.35);
-            R.delay(400);
-            R.setMtZero();
-            R.rotate(45);
-            R.g(1350);
-            R.rotate(-85);
-            R.g(1630);
-            R.rotate(45);
-            /*R.setMtPower(-0.35, -0.35, 0.35, 0.35);
-            R.delay(400);
-            R.setMtZero();*/
+            R.rotate(90);
+            R.g(1300);
+            R.rotate(-90);
+            R.g(1700);
+            R.setLift(-190);
+            //R.LT.setPower(-0.1);
+            //R.delay(600);
+            //R.LT.setPower(0);
         }
 
     }

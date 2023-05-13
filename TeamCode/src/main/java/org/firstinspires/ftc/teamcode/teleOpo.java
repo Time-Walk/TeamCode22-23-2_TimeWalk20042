@@ -26,7 +26,7 @@ public class teleOpo extends LinearOpMode {
         R.NeState = "Driving";
         R.liftControllerT.start();  //Запуск работы лифта
         while (!isStopRequested()){
-            //R.wheelbase();   //Передвижение колесной базы
+            R.wheelbase();   //Передвижение колесной базы
             R.servoController();    //Контроль серво на клешне
             R.servoControllerPro();
             R.driverHelper();

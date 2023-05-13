@@ -9,8 +9,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public abstract class Robot {
     FtcDashboard ftcDash = FtcDashboard.getInstance();
-    //Telemetry telemetry; //Создование всех переменных
-    Telemetry telemetry = ftcDash.getTelemetry();
+    Telemetry telemetry; //Создование всех переменных
+    //Telemetry telemetry = ftcDash.getTelemetry();
     Gamepad gamepad1;
     Gamepad gamepad2;
     LinearOpMode L;
